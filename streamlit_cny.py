@@ -30,7 +30,7 @@ def calculate_not_burst_percentage(player_hand, deck_played):
 
 def main():
     st.title("Blackjack Probability Calculator")
-
+    st.subheader("Calculate your odds of not bursting on the next card!")
     with st.sidebar:
         num_decks = st.number_input("Number of decks:", min_value=1, value=1)
         deck_played = create_deck(num_decks)
