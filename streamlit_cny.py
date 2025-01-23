@@ -49,19 +49,21 @@ def main():
                 for deck_dict in deck_played:
                     if card in deck_dict:
                         value = deck_dict.pop(card)
-                        
+        
                         # Dynamic Ace handling
                         if value == 11 and sum(player_hand) + 11 > 21:
                             value = 1
+        
+                        player_hand.append(value)
                         
-                        # Change all Aces to 1 point after second card
+                        # Convert Aces in deck to 1 after the second card
                         if len(player_hand) >= 2:
                             for d in deck_played:
                                 if "A" in d:
                                     d["A"] = 1
                         
-                        player_hand.append(value)
                         break
+
 
     with col2:
         st.subheader("Analysis")
