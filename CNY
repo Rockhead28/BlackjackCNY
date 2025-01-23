@@ -1,5 +1,7 @@
+import streamlit as st
 import copy
 
+# Define card values
 cards = [{
     "A": 11,
     "2": 2,
@@ -14,90 +16,68 @@ cards = [{
     "J": 10,
     "Q": 10,
     "K": 10
-    }]
+}]
 
-
-#temp until it works
+# Initialize the deck
 deck = [copy.deepcopy(cards[0]) for _ in range(4)]  # 4 independent dictionaries
 
-# Create the deck as a list
-question_deck = int(input("Number of decks being played: "))
+# Input: Number of decks being played
+question_deck = st.number_input("Number of decks being played:", min_value=1, step=1, value=1)
 deck_played = [copy.deepcopy(card) for _ in range(question_deck) for card in deck]
- 
 
-print (deck_played)
-
-
-#list is important to account for double dealing of Aces
+# Player's hand
 player_hand = []
 
-
-#this works now. I do not know why but it works. DON'T TOUCH!!!
-def get_valid_card(prompt):
-    while True:
-        player_card = input(prompt).upper()
+# Function to get a valid card
+def get_valid_card(deck_played, prompt):
+    player_card = st.text_input(prompt).upper()  # Streamlit input
+    if player_card:
         for card_dict in deck_played:
             if player_card in card_dict:
-                # Retrieve the value and remove the card only from the current dictionary
                 value = card_dict.pop(player_card)
-                return value  # Exit immediately after processing the first match
-        print("Invalid card. Please try again.")
+                return value
+        st.error("Invalid card. Please try again.")
+    return None
 
-# Get first card
-player_card1 = get_valid_card("What is your first card? ")
-player_hand.append(player_card1)
+# Add cards to player's hand
+if "player_hand" not in st.session_state:
+    st.session_state.player_hand = []
 
-# Get second card
-player_card2 = get_valid_card("What is your second card? ")
-player_hand.append(player_card2)
-    
-# Get third card
-player_card3 = get_valid_card("What is your third card? ")
-player_hand.append(player_card3)
+for i in range(1, 6):  # Allow up to 5 cards
+    if len(st.session_state.player_hand) < i:
+        card = get_valid_card(deck_played, f"What is your card {i}?")
+        if card:
+            st.session_state.player_hand.append(card)
 
-# Get fourth card
-player_card4 = get_valid_card("What is your fourth card? ")
-player_hand.append(player_card4)
+# Update player's hand
+player_hand = st.session_state.player_hand
 
-# Get fifth card
-player_card5 = get_valid_card("What is your fifth card? ")
-player_hand.append(player_card5)
-
-
-
-#to account double Aces dealing on first hand
+# Adjust for double aces in the first hand
 if len(player_hand) == 2 and sum(player_hand) == 22:
-    player_hand [0] = 10
+    player_hand[0] = 10
 
-print (f"Player hand is {player_hand}")
-print (f"Total sum of cards is: {sum(player_hand)}")
+# Display player's hand and total
+st.write(f"Player's hand: {player_hand}")
+st.write(f"Total sum of cards: {sum(player_hand)}")
 
-
-"""Calculation of percentage on next card to not burst
-
-Formula: i = (21 - player_hand)/ number of card left in deck_played
-
-This script works to run through entire card left in deck"""
-
-points_left = 21-sum(player_hand)
-
-# Initialize counter
+# Calculate percentage to not burst
+points_left = 21 - sum(player_hand)
 count_perc = 0
 number_card_left = 0
-# Loop through each dictionary in the list
+
+# Loop through each dictionary in the deck to count eligible cards
 for deck_dict in deck_played:
-    # Loop through inner the dictionary in the list
-    for card_name, card_value in deck_dict.items():
+    for card_value in deck_dict.values():
         if card_value <= points_left:
             count_perc += 1
 
-print(f"Number of cards below {points_left} points: {count_perc} cards")
+# Count remaining cards
+number_card_left = sum(len(deck_dict) for deck_dict in deck_played)
 
+# Calculate and display the percentage
+if number_card_left > 0:
+    percentage_v2 = (count_perc / number_card_left) * 100
+    st.write(f"Percentage of not bursting: {percentage_v2:.2f}%")
+else:
+    st.write("No cards left in the deck.")
 
-for no_card in deck_played:
-    card_in_dict = len(no_card)
-    number_card_left += card_in_dict
-
-#calculate percentage that next card wouldn't burst
-percentage_v2 = count_perc/number_card_left*100
-print(f"{percentage_v2:.2f}%")
