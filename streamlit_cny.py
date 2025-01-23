@@ -66,7 +66,7 @@ def main():
 
             # Calculate not burst percentage
             percentage = calculate_not_burst_percentage(player_hand, deck_played)
-            st.markdown(f"### Probability of Not Bursting")
+            st.markdown(f"### Probability of Not Bursting on Next Card")
             st.markdown(f"## {percentage:.2f}%", unsafe_allow_html=True)
 
 if __name__ == "__main__":
