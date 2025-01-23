@@ -4,8 +4,8 @@
 # In[ ]:
 
 
-import streamlit as st
 import copy
+import streamlit as st
 
 def create_deck(num_decks):
     base_cards = {
@@ -32,34 +32,42 @@ def calculate_not_burst_percentage(player_hand, deck_played):
 def main():
     st.title("Blackjack Card Analysis")
 
-    # Deck configuration
-    num_decks = st.number_input("Number of decks being played:", min_value=1, value=1)
-    deck_played = create_deck(num_decks)
+    # Sidebar for deck configuration
+    with st.sidebar:
+        num_decks = st.number_input("Number of decks:", min_value=1, value=1)
+        deck_played = create_deck(num_decks)
 
-    # Player hand input
-    player_hand = []
-    for i in range(5):
-        card = st.text_input(f"Enter card {i+1} (A, 2-10, J, Q, K):", key=f"card_{i}")
-        if card:
-            card = card.upper()
-            for deck_dict in deck_played:
-                if card in deck_dict:
-                    value = deck_dict.pop(card)
-                    player_hand.append(value)
-                    break
+    col1, col2 = st.columns([2, 1])
 
-    # Handle double Aces scenario
-    if len(player_hand) == 2 and sum(player_hand) == 22:
-        player_hand[0] = 1
+    with col1:
+        st.subheader("Player Hand")
+        player_hand = []
+        
+        for i in range(5):
+            card = st.text_input(f"Enter card {i+1} (A, 2-10, J, Q, K):", key=f"card_{i}")
+            if card:
+                card = card.upper()
+                for deck_dict in deck_played:
+                    if card in deck_dict:
+                        value = deck_dict.pop(card)
+                        
+                        # Handle Ace values dynamically
+                        if value == 11 and sum(player_hand) + 11 > 21:
+                            value = 1
+                        
+                        player_hand.append(value)
+                        break
 
-    # Display results
-    if player_hand:
-        st.write(f"Player hand: {player_hand}")
-        st.write(f"Total sum of cards: {sum(player_hand)}")
+    with col2:
+        st.subheader("Analysis")
+        if player_hand:
+            st.write(f"Player hand: {player_hand}")
+            st.write(f"Total sum of cards: {sum(player_hand)}")
 
-        # Calculate not burst percentage
-        percentage = calculate_not_burst_percentage(player_hand, deck_played)
-        st.write(f"Percentage of not bursting with next card: {percentage:.2f}%")
+            # Calculate not burst percentage
+            percentage = calculate_not_burst_percentage(player_hand, deck_played)
+            st.markdown(f"### Probability of Not Bursting")
+            st.markdown(f"## {percentage:.2f}%", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
