@@ -13,8 +13,7 @@ def create_deck(num_decks):
         "6": 6, "7": 7, "8": 8, "9": 9, "10": 10,
         "J": 10, "Q": 10, "K": 10
     }
-    deck = [copy.deepcopy(base_cards) for _ in range(4 * num_decks)]
-    return deck
+    return [copy.deepcopy(base_cards) for _ in range(4 * num_decks)]
 
 def calculate_not_burst_percentage(player_hand, deck_played):
     points_left = 21 - sum(player_hand)
@@ -30,9 +29,8 @@ def calculate_not_burst_percentage(player_hand, deck_played):
     return (count_perc / number_card_left * 100) if number_card_left > 0 else 0
 
 def main():
-    st.title("Blackjack Card Analysis")
+    st.title("Blackjack Probability Calculator")
 
-    # Sidebar for deck configuration
     with st.sidebar:
         num_decks = st.number_input("Number of decks:", min_value=1, value=1)
         deck_played = create_deck(num_decks)
@@ -51,9 +49,15 @@ def main():
                     if card in deck_dict:
                         value = deck_dict.pop(card)
                         
-                        # Handle Ace values dynamically
+                        # Dynamic Ace handling
                         if value == 11 and sum(player_hand) + 11 > 21:
                             value = 1
+                        
+                        # Change all Aces to 1 point after second card
+                        if len(player_hand) >= 2:
+                            for d in deck_played:
+                                if "A" in d:
+                                    d["A"] = 1
                         
                         player_hand.append(value)
                         break
@@ -66,7 +70,7 @@ def main():
 
             # Calculate not burst percentage
             percentage = calculate_not_burst_percentage(player_hand, deck_played)
-            st.markdown(f"### Probability of Not Bursting on Next Card")
+            st.markdown(f"### Probability of Not Bursting")
             st.markdown(f"## {percentage:.2f}%", unsafe_allow_html=True)
 
 if __name__ == "__main__":
